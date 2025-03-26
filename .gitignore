@@ -1,0 +1,10 @@
+# Ignore node_modules in any folder
+node_modules/
+
+# Ignore C++ executable files
+*.exe
+*.out
+*.o
+*.env
+
+
