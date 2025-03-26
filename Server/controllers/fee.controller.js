@@ -9,12 +9,19 @@ import Parent from "../models/parent.model.js";
 import Stripe from "stripe";
 
 export const intent = async (req, res, next) => {
+
     try {
         const stripe = new Stripe("sk_test_51PDPgFSI9RTm3dVEiIwWb7AMgdvgMqcxzwmL20PnxGBdWazOZWrIp2LD25jPU2mROmLtuyLoQMlOFemn55LVrRYf00xRiHbIF6");
 
         const userId = req.user;
         const userData = await Parent.findById(userId.id).select("-password");
-
+        const feeRecords = await Fees.findOne({ student: userData.student });
+        if (feeRecord) {
+            return res.status(400).json({
+                success: false,
+                message: "Already paid fees"
+            })
+        }
 
         const student = await Student.findById(userData.student);
         const classData = await Class.findById(student.class)
@@ -74,15 +81,37 @@ export const getFeeStatusForClass = async (req, res, next) => {
 };
 export const getFeeStatus = async (req, res, next) => {
     try {
+        const userId = req.user;
 
+        // Fetch parent data
+        if (userId.role === "parent") {
+            const parents = await Parent.findById(userId.id).select("-password");
+            if (!parents || !parents.student) {
+                return res.status(404).json({ success: false, message: "Student not found" });
+            }
 
-        const feeRecords = await Fees.find().populate("class");
+            const feeRecord = await Fees.find({ student: parents.student }).populate("class student");
+
+            const feeHistorys = feeRecord.map(record => ({
+                amountPaid: record.Amount,
+                paymentDate: record.createdAt,
+                name: record.class.name,
+                studentName: record.student.name
+            }));
+
+            return res.status(200).json({
+                success: true,
+                data: feeHistorys
+            });
+        }
+
+        const feeRecords = await Fees.find().populate("class student");
 
         const feeHistory = feeRecords.map(record => ({
             amountPaid: record.Amount,
             paymentDate: record.createdAt,
             name: record.class.name,
-
+            studentName: record.student.name
         }));
 
         res.status(200).json({

@@ -10,6 +10,7 @@ import FormModal from "@/components/FormModal";
 import { useEffect, useState } from "react";
 import api from "@/utils/api";
 import getCurrentUser from "@/utils/currentUser";
+import toast from "react-hot-toast";
 
 type Class = {
   id: number;
@@ -73,7 +74,8 @@ const ClassListPage = () => {
         capacity,
         feesAmount,
       });
-      alert("Class created successfully!");
+      toast.success("Class created successfully!");
+
       setOpen(false);
     } catch (error) {
       console.error("Error creating announcement:", error);
@@ -121,7 +123,7 @@ const ClassListPage = () => {
       <td className="flex items-center gap-4 p-4">{item.name}</td>
       <td className="hidden md:table-cell">{item.capacity}</td>
 
-      {/* <td className="hidden md:table-cell">{item.supervisor?.name}</td> */}
+      <td className="hidden md:table-cell">{item.supervisor?.name}</td>
       <td>
         <div className="flex items-center gap-2">
           {user?.role === "admin" && (
@@ -292,7 +294,7 @@ const ClassListPage = () => {
               {selectedClass.students.length > 0 ? (
                 selectedClass.students.map((student: any) => (
                   <li key={student._id} className="p-2 border-b">
-                    {student.name} 
+                    {student.name}
                   </li>
                 ))
               ) : (
@@ -311,11 +313,12 @@ const ClassListPage = () => {
             <button
               onClick={async () => {
                 try {
-                  await api.post(`/class/${selectedClass._id}/add-student`, {
+                  await api.post(`/class/add-student`, {
                     classId: selectedClass._id,
                     studentId: newStudentEmail,
                   });
-                  alert("Student added successfully!");
+                  toast.success("Student added successfully!");
+
                   setStudentOpen(false);
                 } catch (error) {
                   console.error("Error adding student:", error);

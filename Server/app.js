@@ -8,6 +8,7 @@ import announcmentRouter from "./routes/announcment.route.js";
 import studentRouter from "./routes/student.route.js";
 import lectureRouter from "./routes/lecture.route.js";
 import feeRouter from "./routes/fee.route.js";
+import parentRouter from "./routes/parent.route.js";
 export const app = express();
 
 app.use(cors({ origin: "http://localhost:3000", credentials: true }));
@@ -21,6 +22,7 @@ app.use("/api/v1/announce", announcmentRouter);
 app.use("/api/v1/student", studentRouter);
 app.use("/api/v1/fees", feeRouter);
 app.use("/api/v1/lecture", lectureRouter);
+app.use("/api/v1/parent", parentRouter)
 
 app.get("/", (req, res) => {
   console.log(req);

@@ -3,13 +3,12 @@ import TableSearch from "@/components/TableSearch";
 import Image from "next/image";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
-import { access } from "fs";
 import Link from "next/link";
-import { role } from "@/lib/data";
 import FormModal from "@/components/FormModal";
 import { useEffect, useState } from "react";
 import api from "@/utils/api";
 import getCurrentUser from "@/utils/currentUser";
+import toast from "react-hot-toast";
 
 type Student = {
   _id: number;
@@ -64,25 +63,27 @@ const StudentListPage = () => {
 
   const [open, setOpen] = useState<boolean>(false);
   const [user, setUser] = useState<User | null>(null);
-  const [studentOpen, setStudentOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState<any>(null);
-  const [newStudentEmail, setNewStudentEmail] = useState("");
+  const [studentInfo, setStudentInfo] = useState({
+    name: "",
+    email: "",
+    password: "",
+    rollNumber: "",
+    phone: "",
+    address: "",
+    bloodType: "",
+    sex: "",
+    birthday: "",
+  });
 
-  const [name, setName] = useState("");
-  const [supervisor, setSupervisor] = useState("");
-  const [capacity, setCapacity] = useState(0);
-  const [feesAmount, setfeesAmount] = useState(0);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      await api.post("/class/create", {
-        name,
-        supervisor,
-        capacity,
-        feesAmount,
+      await api.post("/auth/register", {
+        ...studentInfo,
+        role: "student",
       });
-      alert("Class created successfully!");
+      toast.success("Class created successfully!");
       setOpen(false);
     } catch (error) {
       console.error("Error creating announcement:", error);
@@ -143,7 +144,7 @@ const StudentListPage = () => {
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>
           </Link>
-          {role === "admin" && (
+          {user?.role === "admin" && (
             <>
               <FormModal table="student" type="update" data={item} />
               <FormModal table="student" type="delete" id={item._id} />
@@ -168,12 +169,15 @@ const StudentListPage = () => {
             <button className="w-8 h-8 flex items-center justify-center bg-greenlight text-white rounded-full">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && (
-              //     <button className="w-8 h-8 flex items-center justify-center bg-bluelight text-white rounded-full">
-              //   <Image src="/plus.png" alt="" width={14} height={14}/>
-              // </button>
-              <FormModal table="student" type="create" />
-            )}
+            {user?.role === "admin" && (
+              //   <FormModal table="announcements" type="create" />
+              <button
+                onClick={() => setOpen(!open)}
+                className="w-8 h-8 flex items-center justify-center bg-greenlight text-black rounded-full"
+              >
+                +
+              </button>
+            )}{" "}
           </div>
         </div>
       </div>
@@ -183,6 +187,189 @@ const StudentListPage = () => {
       </div>
       {/* Pagination  */}
       <Pagination />
+
+      {open && user?.role === "admin" && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="bg-white p-8 rounded-xl shadow-2xl w-[500px] max-w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Student Registration
+              </h2>
+              <button
+                onClick={() => setOpen(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+                aria-label="Close modal"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4">
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter student name"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={studentInfo.name}
+                  onChange={(e) =>
+                    setStudentInfo({ ...studentInfo, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  placeholder="Enter student email"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={studentInfo.email}
+                  onChange={(e) =>
+                    setStudentInfo({ ...studentInfo, email: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  placeholder="Create password"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={studentInfo.password}
+                  onChange={(e) =>
+                    setStudentInfo({ ...studentInfo, password: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Roll Number
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter roll number"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={studentInfo.rollNumber}
+                  onChange={(e) =>
+                    setStudentInfo({
+                      ...studentInfo,
+                      rollNumber: e.target.value,
+                    })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  placeholder="Enter contact number"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={studentInfo.phone}
+                  onChange={(e) =>
+                    setStudentInfo({ ...studentInfo, phone: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Gender
+                </label>
+                <select
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={studentInfo.sex}
+                  onChange={(e) =>
+                    setStudentInfo({ ...studentInfo, sex: e.target.value })
+                  }
+                  required
+                >
+                  <option value="">Select Gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter full address"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={studentInfo.address}
+                  onChange={(e) =>
+                    setStudentInfo({ ...studentInfo, address: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="col-span-2 md:col-span-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  className="w-full p-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all"
+                  value={studentInfo.birthday}
+                  onChange={(e) =>
+                    setStudentInfo({ ...studentInfo, birthday: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div className="col-span-2 mt-5">
+                <button
+                  type="submit"
+                  className="w-full p-3 bg-blue-600 text-white bg-black rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  Register Student
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

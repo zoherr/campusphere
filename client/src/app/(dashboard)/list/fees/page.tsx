@@ -35,10 +35,16 @@ const columns = [
     className: "hidden md:table-cell",
   },
   {
+    header: "Student Name",
+    accessor: "studentName",
+    className: "hidden md:table-cell",
+  },
+  {
     header: "Date",
     accessor: "paymentDate",
     className: "hidden md:table-cell",
   },
+  
 ];
 
 interface classType {
@@ -97,6 +103,7 @@ const FeesPage = () => {
     >
       <td className="flex items-center gap-4 p-4">{item.name}</td>
       <td className="hidden md:table-cell">{item.amountPaid}</td>
+      <td className="hidden md:table-cell">{item.studentName}</td>
 
       <td className="hidden md:table-cell">{formatDate(item.paymentDate)}</td>
     </tr>

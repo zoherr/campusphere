@@ -44,12 +44,16 @@ export const addStudentToClass = async (req, res, next) => {
     try {
         const { classId, studentId } = req.body;
 
+
         const studentExists = await Student.findOne({ rollNumber: studentId });
         if (!studentExists) {
             return next(createError(404, "Student not found"));
         }
+        console.log(studentExists);
 
         const classData = await Class.findById(classId);
+        console.log(classData);
+
         if (!classData) {
             return next(createError(404, "Class not found"));
         }
@@ -57,9 +61,9 @@ export const addStudentToClass = async (req, res, next) => {
         if (classData.students.length >= classData.capacity) {
             return next(createError(400, "Class is full"));
         }
-        studentExists.class = classId
+        studentExists.class = classData._id
         await studentExists.save()
-        classData.students.push(studentId);
+        classData.students.push(studentExists._id);
         await classData.save();
 
         res.status(200).json({ success: true, message: "Student added to class", data: classData });
