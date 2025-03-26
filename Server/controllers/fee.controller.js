@@ -8,10 +8,11 @@ import Parent from "../models/parent.model.js";
 
 import Stripe from "stripe";
 
+const striptKey = process.env.STRIPE
 export const intent = async (req, res, next) => {
 
     try {
-        const stripe = new Stripe("sk_test_51PDPgFSI9RTm3dVEiIwWb7AMgdvgMqcxzwmL20PnxGBdWazOZWrIp2LD25jPU2mROmLtuyLoQMlOFemn55LVrRYf00xRiHbIF6");
+        const stripe = new Stripe(striptKey);
 
         const userId = req.user;
         const userData = await Parent.findById(userId.id).select("-password");
